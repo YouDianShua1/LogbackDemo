@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+    <!-- define动态获取LOG_HOME, TAS为${TAS_HOME}/logs, tomcat为${CATALINA_HOME}/logs,
+        springboot为相对于jar路径的logs目录, 如需其他路径可自行配置property -->
+    <!-- <property name="LOG_HOME" value="/opt/thunisoft/rdcslogs"/> -->
+    <define name="SUFFIX" class="com.wangboran.logbackdemo.define.SuffixDefine"/>
+    <define name="LOG_HOME" class="com.wangboran.logbackdemo.define.LogHome"/>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <property name="APP_NAME" value="logbackdemo"/>
+
+    <!-- 控制台输出 -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>info</level>
+        </filter>
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5level] [%-5thread] %logger{20} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 正常日志输出文件 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 文件夹 -->
+        <File>${LOG_HOME}/${APP_NAME}_stdout.log</File>
+        <!-- 文件名称 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_HOME}/${APP_NAME}_stdout.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <!-- 两天归档 -->
+            <maxHistory>2</maxHistory>
+        </rollingPolicy>
+        <!-- 输出格式 -->
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5level] [%-5thread] %logger{20} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+        <!-- 错误日志输出文件 -->
+        <appender name="FILE-ERROR"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>error</level>
+            </filter>
+            <File>${LOG_HOME}/${APP_NAME}_stderr.log</File>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <FileNamePattern>${LOG_HOME}/${APP_NAME}_stderr.%d{yyyy-MM-dd}.log</FileNamePattern>
+                <maxHistory>2</maxHistory>
+            </rollingPolicy>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5level] [%-5thread] %logger{20} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+    <!--    &lt;!&ndash; 默认jdbc日志输出文件 &ndash;&gt;-->
+    <!--    <appender name="FILE-JDBC"-->
+    <!--              class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+    <!--        &lt;!&ndash; 集群部署日志名建议加上ip和port &ndash;&gt;-->
+    <!--        <File>${LOG_HOME}/${APP_NAME}_jdbc_${IP}_${PORT}.log</File>-->
+    <!--        <encoder>-->
+    <!--            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5level] [%-5thread] [%X{request.url}] %logger{20} - %msg%n</pattern>-->
+    <!--        </encoder>-->
+    <!--        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+    <!--            <level>${LOG_LEVEL_COMMON}</level>-->
+    <!--        </filter>-->
+    <!--        <append>true</append>-->
+    <!--        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+    <!--            <fileNamePattern>${LOG_HOME}/${APP_NAME}_jdbc.%d{yyyy-MM-dd}_${IP}_${PORT}.log</fileNamePattern>-->
+    <!--            <maxHistory>2</maxHistory>-->
+    <!--        </rollingPolicy>-->
+    <!--    </appender>-->
+
+        <!-- 数据转换服务日至输出 -->
+        <appender name="FILE-CUSTOM" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <File>${LOG_HOME}/custom-log/${APP_NAME}.log</File>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <FileNamePattern>${LOG_HOME}/${APP_NAME}_dtf.%d{yyyy-MM-dd}.log</FileNamePattern>
+                <maxHistory>2</maxHistory>
+            </rollingPolicy>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>%msg%n</pattern>
+            </encoder>
+        </appender>
+
+
+    <!--    &lt;!&ndash; UIM缓存刷新日志，平常用不到，需要定位问题时再打开 &ndash;&gt;-->
+    <!--    <logger name="com.thunisoft.aap.uim.client.organ.ehcache" level="off" />-->
+    <!--    &lt;!&ndash; druid线程池相关日志（若使用的其他线程池组件，请更换包路径） &ndash;&gt;-->
+    <!--    <logger name="com.alibaba.druid.pool" level="off" />-->
+    <!--    &lt;!&ndash; jdbc相关无用输出 &ndash;&gt;-->
+    <!--    <logger name="jdbc.sqlonly" level="off" />-->
+    <!--    <logger name="jdbc.connection" level="off" />-->
+    <!--    <logger name="jdbc.audit" level="off" />-->
+    <!--    <logger name="jdbc.resultset" level="off" />-->
+    <!--    <logger name="jdbc.resultsettable" level="off" />-->
+    <!--    -->
+    <!--    <logger name="jdbc.sqltiming" level="info" additivity="true">-->
+    <!--		<appender-ref ref="FILE-JDBC" />-->
+    <!--	</logger>-->
+    <!--	-->
+    	<!-- 自定义日志打印监控的类 -->
+    	<logger name="com.wangboran.logbackdemo.custom.CustomLogClass" level="info">
+    		<appender-ref ref="FILE-CUSTOM" />
+    	</logger>
+
+    <root>
+    <!--appender标签中的level和root中的level较高的等级生效-->
+        <level value="INFO" />
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="FILE-ERROR" />
+    </root>
+</configuration>
